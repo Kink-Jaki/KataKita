@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Artikel - KataKita</title>
+    <!-- Bootstrap CSS v5.3.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+</head>
+
+<body class="bg-white">
+
+    <!-- Navbar Minimalis -->
+    <nav class="navbar navbar-expand-lg text-bg-dark sticky-top border-bottom border-warning border-4"
+        data-bs-theme="dark">
+        <div class="container-fluid px-4 py-1">
+            <div class="d-flex align-items-center">
+                <a class="navbar-brand fw-bold fs-3 text-warning animate__animated animate__fadeIn"
+                    href="{{ url('/') }}">KataKita</a>
+                <span class="ms-3 ps-3 border-start border-secondary text-secondary d-none d-md-inline small">Mode
+                    Revisi</span>
+            </div>
+
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <a href="{{ url('/myblog') }}"
+                    class="btn btn-link text-white text-decoration-none d-none d-sm-inline-block small">Batalkan
+                    Perubahan</a>
+                @auth
+                    <div class="dropdown">
+                        <button
+                            class="btn btn-outline-light rounded-circle p-0 d-flex align-items-center justify-content-center"
+                            style="width: 38px; height: 38px;" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-fill"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                            <li><span class="dropdown-item-text fw-bold small text-secondary">MASUK SEBAGAI</span></li>
+                            <li><span class="dropdown-item-text fw-bold">{{ Auth::user()->name }}</span></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                @endauth
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar Panel Kiri (Status & Detail) -->
+            <div class="col-lg-3 col-xl-2 bg-light border-end min-vh-100 d-none d-lg-block p-4">
+                <div class="sticky-top" style="top: 100px;">
+                    <h6 class="fw-bold text-uppercase text-secondary small mb-4" style="letter-spacing: 1px;">Detail
+                        Artikel</h6>
+
+                    <div class="mb-4">
+                        <label class="small text-muted d-block mb-1">ID Artikel</label>
+                        <div class="fw-medium text-dark">#{{ $blog->id_blog }}</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="small text-muted d-block mb-1">Terakhir Diperbarui</label>
+                        <div class="fw-medium text-dark small">
+                            <i class="bi bi-clock-history me-1 text-warning"></i>
+                            {{ $blog->updated_at->diffForHumans() }}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="small text-muted d-block mb-1">Estimasi Baca</label>
+                        <div id="readTime" class="fw-medium text-dark">0 Menit</div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div
+                        class="p-3 bg-warning-subtle rounded-3 border border-warning border-opacity-25 small text-dark">
+                        <i class="bi bi-info-circle-fill me-1"></i> Perubahan yang Anda simpan akan langsung terlihat
+                        oleh pembaca.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workspace Editor Utama -->
+            <div class="col-lg-9 col-xl-10 p-0">
+                <form method="POST" action="{{ route('myblog.update', $blog->id_blog) }}"
+                    enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+
+                    <!-- Cover Image Upload & Preview Section -->
+                    <div class="bg-light border-bottom position-relative" style="min-height: 200px;">
+                        <div id="imagePreviewContainer" class="w-100 {{ $blog->cover ? '' : 'd-none' }}">
+                            <img id="coverPreview" src="{{ $blog->cover ? asset('storage/' . $blog->cover) : '#' }}"
+                                class="w-100 object-fit-cover" style="height: 350px;">
+                        </div>
+
+                        <div class="position-absolute bottom-0 end-0 p-4">
+                            <label for="coverInput" class="btn btn-dark btn-sm rounded-pill px-3 shadow">
+                                <i class="bi bi-camera me-2"></i> {{ $blog->cover ? 'Ganti Cover' : 'Tambah Cover' }}
+                            </label>
+                            <input type="file" name="cover" id="coverInput" class="d-none" accept="image/*">
+                        </div>
+
+                        @if (!$blog->cover)
+                            <div id="placeholderText"
+                                class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary">
+                                <i class="bi bi-image fs-1 mb-2"></i>
+                                <p class="small mb-0">Belum ada gambar cover</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Header Input Area (Judul) -->
+                    <div class="p-4 p-md-5 border-bottom">
+                        <div class="mx-auto" style="max-width: 850px;">
+                            <label class="text-uppercase small fw-bold text-secondary mb-2 d-block"
+                                style="letter-spacing: 1px;">Judul Artikel</label>
+                            <input type="text" name="judul_artikel"
+                                class="form-control form-control-lg border-0 fs-1 fw-bold p-0 shadow-none @error('judul_artikel') is-invalid @enderror"
+                                placeholder="Masukkan Judul Disini..."
+                                value="{{ old('judul_artikel', $blog->judul_artikel) }}"
+                                style="letter-spacing: -1px; background: transparent;">
+                            @error('judul_artikel')
+                                <div class="invalid-feedback d-block mt-2">
+                                    <i class="bi bi-exclamation-circle me-1"></i> {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Content Area (Editor) -->
+                    <div class="p-4 p-md-5 mb-5">
+                        <div class="mx-auto" style="max-width: 850px;">
+                            <label class="text-uppercase small fw-bold text-secondary mb-3 d-block"
+                                style="letter-spacing: 1px;">Isi Konten</label>
+                            <textarea name="content" id="editorContent" rows="15"
+                                class="form-control border-0 p-0 shadow-none @error('content') is-invalid @enderror"
+                                placeholder="Tuliskan cerita inspiratifmu secara detail..."
+                                style="resize: none; font-size: 1.25rem; line-height: 1.8; background: transparent;">{{ old('content', $blog->content) }}</textarea>
+                            @error('content')
+                                <div class="invalid-feedback d-block mt-3">
+                                    <i class="bi bi-exclamation-circle me-1"></i> {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Floating Action Bar -->
+                    <div class="fixed-bottom bg-white border-top p-3 shadow-lg animate__animated animate__slideInUp">
+                        <div class="container d-flex justify-content-between align-items-center">
+                            <div class="d-none d-md-flex align-items-center">
+                                <span class="badge text-bg-warning me-2">Editor Mode</span>
+                                <span class="text-secondary small">Draf tersimpan secara lokal</span>
+                            </div>
+                            <div class="ms-auto d-flex gap-2">
+                                <a href="{{ url('/myblog') }}"
+                                    class="btn btn-outline-dark rounded-pill px-4 fw-medium">Batal</a>
+                                <button type="submit" class="btn btn-warning rounded-pill px-5 fw-bold shadow">
+                                    Simpan Perubahan <i class="bi bi-cloud-upload ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // 1. Script menghitung estimasi waktu baca
+        const textarea = document.getElementById('editorContent');
+        const readTimeDisplay = document.getElementById('readTime');
+
+        function updateReadTime() {
+            const content = textarea.value.trim();
+            if (content.length === 0) {
+                readTimeDisplay.innerText = '0 Menit';
+                return;
+            }
+            const words = content.split(/\s+/).length;
+            const wpm = 200; // rata-rata kecepatan baca manusia
+            const minutes = Math.ceil(words / wpm);
+            readTimeDisplay.innerText = `${minutes} Menit`;
+        }
+
+        textarea.addEventListener('input', updateReadTime);
+
+        // 2. Script Preview Gambar Cover
+        const coverInput = document.getElementById('coverInput');
+        const coverPreview = document.getElementById('coverPreview');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const placeholderText = document.getElementById('placeholderText');
+
+        coverInput.onchange = evt => {
+            const [file] = coverInput.files;
+            if (file) {
+                coverPreview.src = URL.createObjectURL(file);
+                imagePreviewContainer.classList.remove('d-none');
+                if (placeholderText) placeholderText.classList.add('d-none');
+            }
+        }
+
+        // Jalankan kalkulasi waktu baca saat load pertama kali
+        window.onload = updateReadTime;
+    </script>
+</body>
+
+</html>
