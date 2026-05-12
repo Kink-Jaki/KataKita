@@ -37,13 +37,13 @@ public function store(Request $request)
     $request->validate([
         'judul_artikel' => 'required|min:3',
         'content'       => 'required',
-        'cover'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240', // fix bug 1
+        'cover'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
     ]);
 
     $coverPath = null;
     if ($request->hasFile('cover')) {
         $file     = $request->file('cover');
-        $filename = time() . '_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME); // fix bug 2
+        $filename = time() . '_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME); 
 
         $folder = storage_path('app/public/covers/');
         if (!file_exists($folder)) {
@@ -99,7 +99,7 @@ public function store(Request $request)
         'content'       => 'required',
         'cover'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
     ]);
-    $coverPath = $blog->cover; // pakai gambar lama dulu
+    $coverPath = $blog->cover; 
     if ($request->hasFile('cover')) {
         // Hapus gambar lama
         if ($blog->cover) {
