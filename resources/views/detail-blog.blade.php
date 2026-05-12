@@ -10,40 +10,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
-        .article-cover-wrapper {
-            width: 100%;
-            border-radius: 24px;
-            overflow: hidden;
-            margin-bottom: 2.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .article-cover {
-            width: 100%;
-            height: 450px;
-            object-fit: cover;
-            display: block;
-        }
-        @media (max-width: 768px) {
-            .article-cover { height: 250px; }
-            .article-cover-wrapper { border-radius: 16px; }
-        }
-        .meta-divider {
-            width: 4px;
-            height: 4px;
-            background-color: #dee2e6;
-            border-radius: 50%;
-            margin: 0 12px;
-        }
-        /* Override Quill border agar tidak tampil di halaman detail */
+        /* Override wajib untuk Quill library — tidak dapat diganti dengan class Bootstrap */
         .ql-snow.ql-toolbar { display: none; }
         .ql-snow.ql-container { border: none; }
-        .ql-editor {
-            padding: 0 !important;
-            font-size: 1.15rem !important;
-            line-height: 1.8 !important;
-            color: #2d3436 !important;
-            text-align: justify;
-        }
+        .ql-editor { padding: 0 !important; font-size: 1.1rem !important; line-height: 1.9 !important; }
     </style>
 </head>
 
@@ -52,9 +22,10 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg text-bg-dark shadow-sm sticky-top mb-4" data-bs-theme="dark">
         <div class="container-fluid px-4 py-1">
-            <a class="navbar-brand fw-bold fs-3 text-warning animate__animated animate__zoomIn" href="{{ url('/') }}">KataKita</a>
+            <a class="navbar-brand fw-bold fs-3 text-warning animate__animated animate__zoomIn"
+                href="{{ url('/') }}">KataKita</a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false">
+                data-bs-target="#navbarSupportedContent" aria-expanded="false">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -78,7 +49,8 @@
                             </ul>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="btn btn-outline-warning fw-semibold rounded-pill px-4">Login</a>
+                        <a href="{{ route('login') }}"
+                            class="btn btn-outline-warning fw-semibold rounded-pill px-4">Login</a>
                     @endauth
                 </div>
             </div>
@@ -93,16 +65,21 @@
                 <nav aria-label="breadcrumb" class="mb-4">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item small">
-                            <a href="{{ url('/') }}" class="text-decoration-none text-secondary">Beranda</a>
+                            <a href="{{ url('/') }}"
+                                class="text-decoration-none text-secondary">Beranda</a>
                         </li>
-                        <li class="breadcrumb-item active small text-dark fw-medium" aria-current="page">Detail Artikel</li>
+                        <li class="breadcrumb-item active small fw-medium" aria-current="page">
+                            Detail Artikel
+                        </li>
                     </ol>
                 </nav>
 
                 <!-- Cover -->
                 @if($blog->cover)
-                    <div class="article-cover-wrapper animate__animated animate__fadeIn">
-                        <img src="{{ asset('storage/' . $blog->cover) }}" alt="{{ $blog->judul_artikel }}" class="article-cover">
+                    <div class="ratio ratio-16x9 rounded-4 overflow-hidden shadow mb-5 animate__animated animate__fadeIn">
+                        <img src="{{ asset('storage/' . $blog->cover) }}"
+                            alt="{{ $blog->judul_artikel }}"
+                            class="w-100 h-100 object-fit-cover d-block">
                     </div>
                 @endif
 
@@ -110,31 +87,41 @@
                 <header class="mb-5">
                     <h1 class="display-5 fw-bold text-dark mb-4">{{ $blog->judul_artikel }}</h1>
 
-                    <div class="d-flex align-items-center flex-wrap">
-                        <div class="d-flex align-items-center me-3">
-                            <div class="bg-dark text-warning rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm"
-                                style="width: 40px; height: 40px;">
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+
+                        <!-- Penulis -->
+                        <div class="d-flex align-items-center">
+                            <div class="bg-dark text-warning rounded-circle d-flex align-items-center
+                                justify-content-center me-2 shadow-sm flex-shrink-0"
+                                style="width:40px;height:40px;">
                                 <i class="bi bi-person-fill"></i>
                             </div>
                             <div>
                                 <p class="mb-0 lh-1 small text-secondary">Penulis</p>
                                 <span class="fw-bold text-dark">{{ $blog->user->name }}</span>
                             </div>
-                        </div>  
+                        </div>
 
-                        <div class="meta-divider d-none d-md-block"></div>
+                        <span class="text-secondary d-none d-md-inline mx-1">·</span>
 
-                        <div class="d-flex align-items-center mt-2 mt-md-0 me-3">
+                        <!-- Tanggal -->
+                        <div class="d-flex align-items-center">
                             <i class="bi bi-calendar3 text-warning me-2"></i>
-                            <span class="text-secondary small">{{ $blog->created_at->translatedFormat('d F Y') }}</span>
+                            <span class="text-secondary small">
+                                {{ $blog->created_at->translatedFormat('d F Y') }}
+                            </span>
                         </div>
 
-                        <div class="meta-divider d-none d-md-block"></div>
+                        <span class="text-secondary d-none d-md-inline mx-1">·</span>
 
-                        <div class="d-flex align-items-center mt-2 mt-md-0">
+                        <!-- Estimasi baca -->
+                        <div class="d-flex align-items-center">
                             <i class="bi bi-clock text-warning me-2"></i>
-                            <span class="text-secondary small">{{ max(1, ceil(str_word_count(strip_tags($blog->content)) / 200)) }} menit baca</span>
+                            <span class="text-secondary small">
+                                {{ max(1, ceil(str_word_count(strip_tags($blog->content)) / 200)) }} menit baca
+                            </span>
                         </div>
+
                     </div>
                 </header>
 
@@ -153,10 +140,10 @@
                         <i class="bi bi-arrow-left me-2"></i>Beranda
                     </a>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-light text-dark btn-sm rounded-circle shadow-sm border p-2" title="Bagikan">
+                        <button class="btn btn-light border rounded-circle p-2 shadow-sm" title="Bagikan">
                             <i class="bi bi-share"></i>
                         </button>
-                        <button class="btn btn-light text-dark btn-sm rounded-circle shadow-sm border p-2" title="Simpan">
+                        <button class="btn btn-light border rounded-circle p-2 shadow-sm" title="Simpan">
                             <i class="bi bi-bookmark"></i>
                         </button>
                     </div>
